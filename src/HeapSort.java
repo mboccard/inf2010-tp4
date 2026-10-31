@@ -29,8 +29,8 @@ public class HeapSort {
 		}
 		int index = 0;
 		while (!heap.isEmpty()) {
-			int elementPrioritaire = heap.poll();
-			arrayToSort[index++] = elementPrioritaire;
+			int element = heap.poll();
+			arrayToSort[index++] = element;
 		}
 	}
 	
@@ -43,21 +43,21 @@ public class HeapSort {
 		//       (faite une copie).
 		//       Afficher les valeurs avant et après le triage.
 
-		int taille = 20;
-		int[] tableau = new int[taille];
+		int lenght = 20;
+		int[] array = new int[lenght];
 		Random random = new Random();
 
-		for (int i = 0; i < taille; i++) {
-			tableau[i] = random.nextInt(100);
+		for (int i = 0; i < lenght; i++) {
+			array[i] = random.nextInt(100);
 		}
 
-		int[] copieTableau = tableau.clone();
-		System.out.println("Tableau avant le triage: " + Arrays.toString(tableau));
+		int[] copieTableau = array.clone();
+		System.out.println("Tableau avant le triage: " + Arrays.toString(array));
 
-		heapSort(tableau, SortingType.ASCENDING);
+		heapSort(array, SortingType.ASCENDING);
 		heapSort(copieTableau, SortingType.DESCENDING);
 
-		System.out.println("Tableau après le triage croissant: " + Arrays.toString(tableau));
+		System.out.println("Tableau après le triage croissant: " + Arrays.toString(array));
 
 		System.out.println("Tableau après le triage décroissant: " + Arrays.toString(copieTableau));
 	}
