@@ -45,6 +45,11 @@ public class HuffmanCompression {
 	
 	// TODO: Génère les codes pour chaque octets
 	//       Changer les entrées au besoin
+	// k est le nombre d'octets distincts
+	// h est la hauteur de l'arbre
+	// L'initialisation du tableau de 256 éléments coûte O(256).
+	// La méthode generateCodesRecursive() parcourt l'arbre et construit les codes binaires en O(kh).
+	// T(k,h) = O(256) + O(kh) = O(256 + kh), donc la complexité temporelle est O(256 + kh).
 	private void generateHuffmanCodes(HuffmanNode node) {
 		huffmanCodes = new String[256];
 		generateCodesRecursive(node, "");
@@ -82,6 +87,7 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Fait la lecture de l'arbre dans le fichier d'entrée (huffmanReader)
+
 	private HuffmanNode recursiveReadTree() throws IOException {
 		int bit = huffmanReader.readBit();
 		if (bit == 1) {
@@ -99,6 +105,12 @@ public class HuffmanCompression {
 	
 	
 	// TODO: Écrit le message compresser dans le fichier de sortie
+	// k est le nombre d'octets distincts
+	// b est le nombre de bits compressés.
+	// L'écriture de l'arbre parcourt 2k-1 noeuds en O(k).
+	// L'écriture de la taille du message coûte O(1).
+	// La boucle parcourt les b bits compressés en O(b).
+	// T(k,b) = O(k) + O(1) + O(b) = O(k+b), donc la complexité temporelle est O(k+b).
 	private void writeHuffmanCompressedFile(HuffmanNode tree, String compressedMessage, String outputFilePath) {
 		try {
         	huffmanWriter = new BitStreamWriter(outputFilePath);
@@ -115,7 +127,13 @@ public class HuffmanCompression {
         }
 	}
 	
-	// TODO: Fait la lecture d'un fichier compresser par l'algorithm de Huffman
+	// TODO: Fait la lecture d'un fichier compresser par l'algorithm de Huffman\
+	// k est le nombre d'octets distincts
+	// b est le nombre de bits compressés.
+	// La reconstruction de l'arbre parcourt 2k-1 noeuds en O(k).
+	// La lecture de la taille du message coûte O(1).
+	// Le décodage parcourt les b bits compressés en O(b).
+	// T(k,b) = O(k) + O(1) + O(b) = O(k+b), donc la complexité temporelle est O(k+b).
 	private byte[] readHuffmanCompressedFile(String inputFilePath) {
         try {
         	huffmanReader = new BitStreamReader(inputFilePath);
@@ -150,6 +168,10 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Calcul la fréquence de chaque occurence d'un octet dans le fichier
+	// n est le nombre d'octets du fichier.
+	// Le tableau est de 256 éléments est initialisé en O(256).
+	// La boucle parcourt les n octets du fichier en O(n).
+	// T(n) = O(256)+O(n) = O(n), donc la complexité temporelle est O(n)
 	private int[] getFrequencies(String inputFilePath) throws IOException {
 		int[] frequencies = new int[256];
 		FileInputStream fileInputStream = null;
@@ -174,6 +196,11 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Faite l'arbre de Huffman à l'aide d'une file de priorité
+	// k est le nombre d'octets distincts du fichier.
+	// L'initialisation parcourt 256 fréquences et ajoute k noeuds dans la file de priorité: O(256 + k log k).
+	// La boucle while s'exécute k-1 fois.
+	// Chaque itération effectue deux poll() et un add(): O(log k), ainsi que la création d'un parent: O(1).
+	// T(k) = O(256 + k log k) + O(k log k) = O(256 + k log k), donc la complexité temporelle est O(256 + k log k)
 	private HuffmanNode generateHuffmanTreeWithPriorityQueue(int[] frequencies) {
 		PriorityQueue<HuffmanNode> queue = new PriorityQueue<HuffmanNode>();
 		for (int i = 0; i < frequencies.length; i++) {
@@ -200,6 +227,12 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Faite l'arbre de Huffman sans l'aide d'une file de priorité
+	// k est le nombre d'octets distincts du fichier.
+	// L'initialisation parcourt 256 fréquences et ajoute k noeuds dans une liste : O(256 + k).
+	// La boucle while s'exécute k-1 fois.
+	// Chaque itération recherche deux minimums en O(k),
+	// crée un parent en O(1) et l'ajoute à la liste en O(1) amorti.
+	// T(k) = O(256 + k) + O(k²) = O(256 + k²). , donc la complexité temporelle est O(256 + k²).
 	private HuffmanNode generateHuffmanTreeWithoutPriorityQueue(int[] frequencies) {
 		List<HuffmanNode> nodes = new ArrayList<>();
 		for (int i = 0; i < frequencies.length; i++) {
@@ -235,6 +268,17 @@ public class HuffmanCompression {
 		compress(inputFilePath, outputFilePath, true);
 	}
 
+	// n est le nombre d'octets du fichier
+	// k le nombre d'octets distincts
+	// h la hauteur de l'arbre
+	// b le nombre de bits compressés.
+	// Le calcul des fréquences coûte O(n + 256).
+	// La construction de l'arbre coûte O(256 + k log k) avec
+	// une file de priorité et O(256 + k²) sans file.
+	// La génération des codes coûte O(256 + kh).
+	// L'encodage et l'écriture des données coûtent O(n + b).
+	// Avec file : T(n,k,h,b) = O(n + 256 + k log k + kh + b).
+	// Sans file : T(n,k,h,b) = O(n + 256 + k² + kh + b).
 	public void compress(String inputFilePath, String outputFilePath, boolean usePriorityQueue) {
 		try {
 			int[] frequencies = getFrequencies(inputFilePath);
@@ -257,6 +301,13 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Décompresse le fichier avec l'algorithme de Huffman, puis l'écrit sur le disque.
+	// n est le nombre d'octets du fichier original,
+	// k le nombre d'octets distincts
+	// b le nombre de bits compressés.
+	// La reconstruction de l'arbre coûte O(k).
+	// Le décodage des b bits compressés coûte O(b).
+	// L'écriture des n octets décompressés coûte O(n).
+	// T(n,k,b) = O(k) + O(b) + O(n) = O(k+b+n), donc la complexité est O(k+b+n).
 	public void decompress(String inputFilePath, String outputFilePath) {
 		byte[] data = readHuffmanCompressedFile(inputFilePath);
 		if (data == null)
