@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.nio.file.StandardCopyOption;
 
+
 public class HuffmanCompression {	
 	
 	// TODO: À compléter
@@ -45,11 +46,17 @@ public class HuffmanCompression {
 	
 	// TODO: Génère les codes pour chaque octets
 	//       Changer les entrées au besoin
-	// k est le nombre d'octets distincts
-	// h est la hauteur de l'arbre
+	// k est le nombre d'octets distincts.
+	// h est la hauteur de l'arbre.
+	// Complexité temporelle :
 	// L'initialisation du tableau de 256 éléments coûte O(256).
-	// La méthode generateCodesRecursive() parcourt l'arbre et construit les codes binaires en O(kh).
-	// T(k,h) = O(256) + O(kh) = O(256 + kh), donc la complexité temporelle est O(256 + kh).
+	// La méthode récursive parcourt l'arbre et construit les codes en O(kh).
+	// T(k,h) = O(256) + O(kh) = O(256 + kh).
+	// Complexité spatiale :
+	// Le tableau huffmanCodes contient 256 éléments.
+	// Les k codes binaires occupent au maximum O(kh).
+	// La pile récursive et les chaînes temporaires utilisent au plus O(h²).
+	// S(k,h) = O(256 + kh + h²).
 	private void generateHuffmanCodes(HuffmanNode node) {
 		huffmanCodes = new String[256];
 		generateCodesRecursive(node, "");
@@ -105,12 +112,18 @@ public class HuffmanCompression {
 	
 	
 	// TODO: Écrit le message compresser dans le fichier de sortie
-	// k est le nombre d'octets distincts
+	// k est le nombre d'octets distincts.
+	// h est la hauteur de l'arbre.
 	// b est le nombre de bits compressés.
+	// Complexité temporelle :
 	// L'écriture de l'arbre parcourt 2k-1 noeuds en O(k).
 	// L'écriture de la taille du message coûte O(1).
 	// La boucle parcourt les b bits compressés en O(b).
-	// T(k,b) = O(k) + O(1) + O(b) = O(k+b), donc la complexité temporelle est O(k+b).
+	// T(k,b) = O(k) + O(1) + O(b) = O(k + b).
+	// Complexité spatiale :
+	// L'écriture récursive de l'arbre utilise une pile de profondeur h.
+	// Les bits sont écrits directement dans le fichier.
+	// S(h) = O(h).
 	private void writeHuffmanCompressedFile(HuffmanNode tree, String compressedMessage, String outputFilePath) {
 		try {
         	huffmanWriter = new BitStreamWriter(outputFilePath);
@@ -127,13 +140,22 @@ public class HuffmanCompression {
         }
 	}
 	
-	// TODO: Fait la lecture d'un fichier compresser par l'algorithm de Huffman\
-	// k est le nombre d'octets distincts
+	// TODO: Fait la lecture d'un fichier compresser par l'algorithm de Huffman
+	// n est le nombre d'octets du fichier original.
+	// k est le nombre d'octets distincts.
+	// h est la hauteur de l'arbre.
 	// b est le nombre de bits compressés.
+	// Complexité temporelle :
 	// La reconstruction de l'arbre parcourt 2k-1 noeuds en O(k).
 	// La lecture de la taille du message coûte O(1).
 	// Le décodage parcourt les b bits compressés en O(b).
-	// T(k,b) = O(k) + O(1) + O(b) = O(k+b), donc la complexité temporelle est O(k+b).
+	// La création du tableau de sortie coûte O(n).
+	// T(n,k,b) = O(k) + O(b) + O(n) = O(k + b + n).
+	// Complexité spatiale :
+	// L'arbre reconstruit occupe O(k).
+	// La pile récursive occupe O(h).
+	// Les données décompressées occupent O(n).
+	// S(n,k,h) = O(k + h + n).
 	private byte[] readHuffmanCompressedFile(String inputFilePath) {
         try {
         	huffmanReader = new BitStreamReader(inputFilePath);
@@ -169,9 +191,13 @@ public class HuffmanCompression {
 	
 	// TODO: Calcul la fréquence de chaque occurence d'un octet dans le fichier
 	// n est le nombre d'octets du fichier.
-	// Le tableau est de 256 éléments est initialisé en O(256).
+	// Complexité temporelle :
+	// L'initialisation du tableau de 256 éléments coûte O(256).
 	// La boucle parcourt les n octets du fichier en O(n).
-	// T(n) = O(256)+O(n) = O(n), donc la complexité temporelle est O(n)
+	// T(n) = O(256) + O(n) = O(n).
+	// Complexité spatiale :
+	// Le tableau frequencies contient toujours 256 éléments.
+	// S(n) = O(256) = O(1).
 	private int[] getFrequencies(String inputFilePath) throws IOException {
 		int[] frequencies = new int[256];
 		FileInputStream fileInputStream = null;
@@ -196,11 +222,17 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Faite l'arbre de Huffman à l'aide d'une file de priorité
-	// k est le nombre d'octets distincts du fichier.
-	// L'initialisation parcourt 256 fréquences et ajoute k noeuds dans la file de priorité: O(256 + k log k).
+	// k est le nombre d'octets distincts.
+	// Complexité temporelle :
+	// L'initialisation parcourt 256 fréquences et ajoute k noeuds dans la file de priorité en O(256 + k log k).
 	// La boucle while s'exécute k-1 fois.
-	// Chaque itération effectue deux poll() et un add(): O(log k), ainsi que la création d'un parent: O(1).
-	// T(k) = O(256 + k log k) + O(k log k) = O(256 + k log k), donc la complexité temporelle est O(256 + k log k)
+	// Chaque itération effectue deux poll() et un add() en O(log k).
+	// La création du parent coûte O(1).
+	// T(k) = O(256 + k log k) + O(k log k) = O(256 + k log k)
+	// Complexité spatiale :
+	// La file de priorité contient au maximum k noeuds.
+	// L'arbre Huffman contient 2k-1 noeuds.
+	// S(k) = O(k).
 	private HuffmanNode generateHuffmanTreeWithPriorityQueue(int[] frequencies) {
 		PriorityQueue<HuffmanNode> queue = new PriorityQueue<HuffmanNode>();
 		for (int i = 0; i < frequencies.length; i++) {
@@ -227,12 +259,17 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Faite l'arbre de Huffman sans l'aide d'une file de priorité
-	// k est le nombre d'octets distincts du fichier.
-	// L'initialisation parcourt 256 fréquences et ajoute k noeuds dans une liste : O(256 + k).
+	// k est le nombre d'octets distincts.
+	// Complexité temporelle :
+	// L'initialisation parcourt 256 fréquences et ajoute k noeuds dans une liste en O(256 + k).
 	// La boucle while s'exécute k-1 fois.
-	// Chaque itération recherche deux minimums en O(k),
-	// crée un parent en O(1) et l'ajoute à la liste en O(1) amorti.
-	// T(k) = O(256 + k) + O(k²) = O(256 + k²). , donc la complexité temporelle est O(256 + k²).
+	// Chaque itération recherche deux minimums en O(k).
+	// La création du parent et son ajout coûtent O(1).
+	// T(k) = O(256 + k) + O(k²) = O(256 + k²)
+	// Complexité spatiale :
+	// La liste contient au maximum k noeuds.
+	// L'arbre Huffman contient 2k-1 noeuds.
+	// S(k) = O(k).
 	private HuffmanNode generateHuffmanTreeWithoutPriorityQueue(int[] frequencies) {
 		List<HuffmanNode> nodes = new ArrayList<>();
 		for (int i = 0; i < frequencies.length; i++) {
@@ -268,17 +305,25 @@ public class HuffmanCompression {
 		compress(inputFilePath, outputFilePath, true);
 	}
 
-	// n est le nombre d'octets du fichier
-	// k le nombre d'octets distincts
-	// h la hauteur de l'arbre
-	// b le nombre de bits compressés.
+	// n est le nombre d'octets du fichier original.
+	// k est le nombre d'octets distincts.
+	// h est la hauteur de l'arbre.
+	// b est le nombre de bits compressés.
+	// Complexité temporelle :
 	// Le calcul des fréquences coûte O(n + 256).
-	// La construction de l'arbre coûte O(256 + k log k) avec
-	// une file de priorité et O(256 + k²) sans file.
+	// La construction de l'arbre coûte O(256 + k log k) avec une file de priorité et O(256 + k²) sans file.
 	// La génération des codes coûte O(256 + kh).
 	// L'encodage et l'écriture des données coûtent O(n + b).
 	// Avec file : T(n,k,h,b) = O(n + 256 + k log k + kh + b).
 	// Sans file : T(n,k,h,b) = O(n + 256 + k² + kh + b).
+	// Complexité spatiale :
+	// Le tableau des fréquences occupe O(256).
+	// L'arbre Huffman occupe O(k).
+	// Les codes binaires et leurs chaînes temporaires
+	// occupent au maximum O(256 + kh + h²).
+	// Le message encodé occupe O(b).
+	// Avec file : S(n,k,h,b) = O(256 + k + kh + h² + b).
+	// Sans file : S(n,k,h,b) = O(256 + k + kh + h² + b).
 	public void compress(String inputFilePath, String outputFilePath, boolean usePriorityQueue) {
 		try {
 			int[] frequencies = getFrequencies(inputFilePath);
@@ -301,13 +346,20 @@ public class HuffmanCompression {
 	}
 	
 	// TODO: Décompresse le fichier avec l'algorithme de Huffman, puis l'écrit sur le disque.
-	// n est le nombre d'octets du fichier original,
-	// k le nombre d'octets distincts
-	// b le nombre de bits compressés.
+	// n est le nombre d'octets du fichier original.
+	// k est le nombre d'octets distincts.
+	// h est la hauteur de l'arbre.
+	// b est le nombre de bits compressés.
+	// Complexité temporelle :
 	// La reconstruction de l'arbre coûte O(k).
 	// Le décodage des b bits compressés coûte O(b).
 	// L'écriture des n octets décompressés coûte O(n).
-	// T(n,k,b) = O(k) + O(b) + O(n) = O(k+b+n), donc la complexité est O(k+b+n).
+	// T(n,k,b) = O(k) + O(b) + O(n) = O(k + b + n).
+	// Complexité spatiale :
+	// L'arbre reconstruit occupe O(k).
+	// La pile récursive occupe O(h).
+	// Les données décompressées occupent O(n).
+	// S(n,k,h) = O(k + h + n).
 	public void decompress(String inputFilePath, String outputFilePath) {
 		byte[] data = readHuffmanCompressedFile(inputFilePath);
 		if (data == null)
@@ -318,9 +370,149 @@ public class HuffmanCompression {
 			e.printStackTrace();
 		}
 	}
-	
+
+	private void afficherStatistiques(String fichierOriginal, String fichierCompresse) throws IOException {
+		int[] frequencies = getFrequencies(fichierOriginal);
+
+		int k = 0;
+		for (int frequency : frequencies) {
+			if (frequency > 0) {
+				k++;
+			}
+		}
+
+		HuffmanNode root = generateHuffmanTreeWithPriorityQueue(frequencies);
+
+		long tailleArbreBits = 10L * k - 1;
+		long tailleDonneesBits = 0;
+
+		generateHuffmanCodes(root);
+
+		for (int i = 0; i < frequencies.length; i++) {
+			if (frequencies[i] > 0) {
+				tailleDonneesBits += (long) frequencies[i] * huffmanCodes[i].length();
+			}
+		}
+
+		System.out.println("Octets distincts : " + k);
+		System.out.println("Profondeur de l'arbre : " + computeMaxDepth(root));
+		System.out.println("Taille de l'arbre : " + tailleArbreBits / 8.0 + " octets");
+		System.out.println("Taille des donnees : " + tailleDonneesBits / 8.0 + " octets");
+		System.out.println("Taille originale : " + Files.size(Path.of(fichierOriginal)) + " octets");
+		System.out.println("Taille compressee : " + Files.size(Path.of(fichierCompresse)) + " octets");
+	}
+
 	public static void main(String[] args) throws IOException {
+
+		// Test 1 : textuel, peu de caractères, faible diversité
+		String contenu1 = "AB".repeat(50);
+		Files.writeString(Path.of("peu_faible.txt"), contenu1);
+
+		// Test 2 : textuel, peu de caractères, diversité élevée
+		String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		String contenu2 = caracteres + caracteres.substring(0, 38);
+		Files.writeString(Path.of("peu_eleve.txt"), contenu2);
+
+		// Test 3 : textuel, beaucoup de caractères, faible diversité
+		String contenu = "AB".repeat(500_000);
+		Files.writeString(Path.of("beaucoup_faible.txt"), contenu);
+
+		// Test 4 : textuel, beaucoup de caractères, diversité élevée
+		String contenuVarie = caracteres.repeat(16_129) + caracteres.substring(0, 2);
+		Files.writeString(Path.of("beaucoup_eleve.txt"), contenuVarie);
+
+		// Test 5 : binaire, peu d'octets, faible diversité
+		byte[] donnees = new byte[100];
+		for (int i = 0; i < donnees.length; i++) {
+			donnees[i] = (byte) (i % 2);
+		}
+		Files.write(Path.of("peu_faible.bin"), donnees);
+
+		// Test 6 : binaire, peu d'octets, diversité élevée
+		byte[] donneesVariees = new byte[100];
+		for (int i = 0; i < donneesVariees.length; i++) {
+			donneesVariees[i] = (byte) i;
+		}
+		Files.write(Path.of("peu_eleve.bin"), donneesVariees);
+
+		// Test 7 : binaire, beaucoup d'octets, faible diversité
+		byte[] donneesGrandes = new byte[1_000_000];
+		for (int i = 0; i < donneesGrandes.length; i++) {
+			donneesGrandes[i] = (byte) (i % 2);
+		}
+		Files.write(Path.of("beaucoup_faible.bin"), donneesGrandes);
+
+		// Test 8 : binaire, beaucoup d'octets, diversité élevée
+		byte[] donneesGrandesVariees = new byte[1_000_000];
+		for (int i = 0; i < donneesGrandesVariees.length; i++) {
+			donneesGrandesVariees[i] = (byte) (i % 256);
+		}
+		Files.write(Path.of("beaucoup_eleve.bin"), donneesGrandesVariees);
+
+
 		HuffmanCompression hc = new HuffmanCompression();
+
+		// Test 1 : textuel, peu de caractères, faible diversité
+		hc.compress("peu_faible.txt", "compresse1.bin", true);
+		System.out.println("=== Test 1 : Textuel, peu de caractères, faible diversité ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("peu_faible.txt")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse1.bin")));
+
+		// Test 2 : textuel, peu de caractères, diversité élevée
+		hc.compress("peu_eleve.txt", "compresse2.bin", true);
+		System.out.println("=== Test 2 : Textuel, peu de caractères, diversité élevée ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("peu_eleve.txt")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse2.bin")));
+
+		// Test 3 : textuel, beaucoup de caractères, faible diversité
+		hc.compress("beaucoup_faible.txt", "compresse3.bin", true);
+		System.out.println("=== Test 3 : Textuel, beaucoup de caractères, faible diversité ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("beaucoup_faible.txt")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse3.bin")));
+
+		// Test 4 : textuel, beaucoup de caractères, diversité élevée
+		hc.compress("beaucoup_eleve.txt", "compresse4.bin", true);
+		System.out.println("=== Test 4 : Textuel, beaucoup de caractères, diversité élevée ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("beaucoup_eleve.txt")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse4.bin")));
+
+		// Test 5 : binaire, peu d'octets, faible diversité
+		hc.compress("peu_faible.bin", "compresse5.bin", true);
+		System.out.println("=== Test 5 : Binaire, peu d'octets, faible diversité ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("peu_faible.bin")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse5.bin")));
+
+		// Test 6 : binaire, peu d'octets, diversité élevée
+		hc.compress("peu_eleve.bin", "compresse6.bin", true);
+		System.out.println("=== Test 6 : Binaire, peu d'octets, diversité élevée ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("peu_eleve.bin")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse6.bin")));
+
+		// Test 7 : binaire, beaucoup d'octets, faible diversité
+		hc.compress("beaucoup_faible.bin", "compresse7.bin", true);
+		System.out.println("=== Test 7 : Binaire, beaucoup d'octets, faible diversité ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("beaucoup_faible.bin")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse7.bin")));
+
+		// Test 8 : binaire, beaucoup d'octets, diversité élevée
+		hc.compress("beaucoup_eleve.bin", "compresse8.bin", true);
+		System.out.println("=== Test 8 : Binaire, beaucoup d'octets, diversité élevée ===");
+		System.out.println("Taille originale : " + Files.size(Path.of("beaucoup_eleve.bin")));
+		System.out.println("Taille compressée : " + Files.size(Path.of("compresse8.bin")));
+
+
+		String[] fichiersOriginaux = {
+				"peu_faible.txt", "peu_eleve.txt",
+				"beaucoup_faible.txt", "beaucoup_eleve.txt",
+				"peu_faible.bin", "peu_eleve.bin",
+				"beaucoup_faible.bin", "beaucoup_eleve.bin"
+		};
+
+		for (int i = 0; i < fichiersOriginaux.length; i++) {
+			System.out.println("\n=== Statistiques du test " + (i + 1) + " ===");
+			hc.afficherStatistiques(fichiersOriginaux[i], "compresse" + (i + 1) + ".bin");
+		}
+
 
 		// Nous avons vérifié que la compression suivie de la décompression redonne le fichier d’origine
 		hc.compress("test.txt", "test_priority.bin", true);
