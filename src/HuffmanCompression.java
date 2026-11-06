@@ -586,7 +586,6 @@ public class HuffmanCompression {
 		System.out.println("Taille originale : " + Files.size(Path.of("beaucoup_eleve.bin")));
 		System.out.println("Taille compressée : " + Files.size(Path.of("compresse8.bin")));
 
-
 		String[] fichiersOriginaux = {
 				"peu_faible.txt", "peu_eleve.txt",
 				"beaucoup_faible.txt", "beaucoup_eleve.txt",
@@ -599,6 +598,7 @@ public class HuffmanCompression {
 			hc.afficherStatistiques(fichiersOriginaux[i], "compresse" + (i + 1) + ".bin");
 		}
 
+		hc.profiler();
 
 		// Nous avons vérifié que la compression suivie de la décompression redonne le fichier d’origine
 		hc.compress("test.txt", "test_priority.bin", true);
@@ -606,6 +606,7 @@ public class HuffmanCompression {
 		hc.decompress("test_priority.bin", "test_priority.out");
 		hc.decompress("test_no_priority.bin", "test_no_priority.out");
 		byte[] original = Files.readAllBytes(Path.of("test.txt"));
+		System.out.println("=== Tests de la partie 2 ===");
 		System.out.println("Avec file de priorité : " + Arrays.equals(original, Files.readAllBytes(Path.of("test_priority.out"))));
 		System.out.println("Sans file de priorité : " + Arrays.equals(original, Files.readAllBytes(Path.of("test_no_priority.out"))));
 
@@ -628,8 +629,6 @@ public class HuffmanCompression {
 					writer.printf("%d;0x%02X;%d%n", i, i, frequencies[i]);
 			}
 		}
-
-		hc.profiler();
 	}
 	
 }
