@@ -402,6 +402,92 @@ public class HuffmanCompression {
 		System.out.println("Taille compressee : " + Files.size(Path.of(fichierCompresse)) + " octets");
 	}
 
+	private int[] calculerFrequences(byte[] donnees) {
+		int[] frequencies = new int[256];
+
+		for (byte octet : donnees) {
+			frequencies[octet & 0xFF]++;
+		}
+
+		return frequencies;
+	}
+
+	private long calculerTailleEncodee(byte[] donnees) {
+		long nombreBits = 0;
+
+		for (byte octet : donnees) {
+			nombreBits += huffmanCodes[octet & 0xFF].length();
+		}
+
+		return nombreBits;
+	}
+
+	private void profiler() {
+		int[] valeursK = {2, 16, 64, 128, 256};
+		int repetitions = 100;
+		int taille = 100_000;
+
+		for (int k : valeursK) {
+			byte[] donnees = new byte[taille];
+
+			for (int i = 0; i < taille; i++) {
+				donnees[i] = (byte) (i % k);
+			}
+
+			long tempsAvec = 0;
+			long tempsSans = 0;
+			long totalAvec = 0;
+			long totalSans = 0;
+			long tailleBits = 0;
+
+			for (int i = 0; i < repetitions; i++) {
+				long debut = System.nanoTime();
+
+				int[] frequencies = calculerFrequences(donnees);
+
+				long debutArbre = System.nanoTime();
+				HuffmanNode root = generateHuffmanTreeWithPriorityQueue(frequencies);
+				tempsAvec += System.nanoTime() - debutArbre;
+
+				generateHuffmanCodes(root);
+				tailleBits = calculerTailleEncodee(donnees);
+
+				totalAvec += System.nanoTime() - debut;
+
+				debut = System.nanoTime();
+
+				frequencies = calculerFrequences(donnees);
+
+				debutArbre = System.nanoTime();
+				root = generateHuffmanTreeWithoutPriorityQueue(frequencies);
+				tempsSans += System.nanoTime() - debutArbre;
+
+				generateHuffmanCodes(root);
+				calculerTailleEncodee(donnees);
+
+				totalSans += System.nanoTime() - debut;
+			}
+
+			long tailleCompressee = (10L * k - 1 + 32 + tailleBits + 7) / 8;
+
+			System.out.println("\n=== k = " + k + " ===");
+			System.out.println("Taille originale : " + taille + " octets");
+			System.out.println("Taille compressée estimée : " + tailleCompressee + " octets");
+
+			System.out.println("Avec file : " +
+					tempsAvec / repetitions / 1_000_000.0 + " ms");
+
+			System.out.println("Sans file : " +
+					tempsSans / repetitions / 1_000_000.0 + " ms");
+
+			System.out.println("Total avec file : " +
+					totalAvec / repetitions / 1_000_000.0 + " ms");
+
+			System.out.println("Total sans file : " +
+					totalSans / repetitions / 1_000_000.0 + " ms");
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
 
 		// Test 1 : textuel, peu de caractères, faible diversité
@@ -542,6 +628,8 @@ public class HuffmanCompression {
 					writer.printf("%d;0x%02X;%d%n", i, i, frequencies[i]);
 			}
 		}
+
+		hc.profiler();
 	}
 	
 }
